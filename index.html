@@ -1,165 +1,49 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VoltPro Pro - نظام محاسبة كامل</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoltPro Pro - محاسبة</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-*{font-family:'Cairo'}
-body{background:linear-gradient(135deg, #0f0c29, #302b63);color:#fff;display:flex;justify-content:center;padding:15px;margin:0}
-.container{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid #00e5ff;border-radius:25px;padding:20px;width:100%;max-width:650px}
-h1{text-align:center;color:#00e5ff}
-label{display:block;margin:8px 0 4px;font-weight:700;color:#a0e9ff;font-size:14px}
-input{width:100%;padding:10px;background:rgba(0,0,0,.3);border:1px solid #00e5ff;border-radius:10px;color:#fff;box-sizing:border-box}
-button{width:100%;padding:14px;margin-top:8px;background:linear-gradient(90deg,#00c6ff,#0072ff);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
-.btn-add{background:linear-gradient(90deg,#7F00FF,#E100FF)}
-.btn-carry{background:linear-gradient(90deg,#ff8a00,#e52e71)}
-.subscriber{border:1px solid #ff00ff;padding:12px;border-radius:10px;margin-top:10px;background:rgba(0,0,0,0.2)}
-.row{display:flex;gap:8px}
-.row div{flex:1}
-#result{margin-top:15px;padding:15px;background:rgba(0,255,0,.1);border:1px solid #00ff88;display:none;border-radius:15px}
-.history{margin-top:15px;padding:10px;border-radius:10px;border:1px solid #00e5ff;max-height:250px;overflow-y:auto;font-size:13px}
-.payment-box{background:rgba(0,255,136,0.1);padding:8px;border-radius:8px;margin-top:5px}
-.negative{color:#ff5252}.positive{color:#00ff88}
-@media print{body{background:#fff;color:#000}.container{border:none} button{display:none}}
+body{background:#0f0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px}
+.box{background:#1a1a2e;border-radius:15px;padding:15px;margin:15px 0;border:1px solid #00f5ff}
+input{width:45%;padding:8px;margin:5px;background:#0f0f1a;color:#fff;border:1px solid #00f5ff;border-radius:8px;text-align:center}
+button{width:90%;padding:12px;margin:8px 0;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
+.btn1{background:linear-gradient(90deg,#00f5ff,#0088ff);color:#000}
+.btn2{background:linear-gradient(90deg,#ff8c00,#ff2e63);color:#fff}
+.result{color:#00ff88;font-size:18px;margin-top:10px}
+.debt{color:#ff2e63;font-size:18px;margin-top:10px}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>⚡ VoltPro Pro - محاسبة</h1>
 
-<div class="row">
-<div><label>سعر الكيلو</label><input type="number" id="price" value="0.65" step="0.01"></div>
-<div><label>تاريخ القراءة</label><input type="date" id="date"></div>
+<h2>⚡ محاسبة - VoltPro Pro</h2>
+
+<div class="box">
+  <h3>البيانات الرئيسية</h3>
+  سعر الكيلو: <input type="number" id="price" value="27"><br>
+  القراءة السابقة الرئيسية: <input type="number" id="mainPrev"><br>
+  القراءة الحالية الرئيسية: <input type="number" id="mainCurr">
 </div>
 
-<div class="row">
-<div><label>الرئيسية السابقة</label><input type="number" id="prev"></div>
-<div><label>الرئيسية الحالية</label><input type="number" id="current"></div>
-</div>
+<div id="users"></div>
 
-<h2 style="color:#ff00ff;text-align:center">المشتركين</h2>
-<div id="subscribers"></div>
+<button class="btn1" onclick="addUser()">+ اضافة مشترك</button>
+<button class="btn1" onclick="calc()">احسب الفاتورة</button>
+<button class="btn2" onclick="nextWeek()">ترحيل للاسبوع القادم</button>
 
-<button class="btn-add" onclick="addSubscriber()">+ اضافة مشترك</button>
-<button onclick="calculateAndSave()">احسب الفاتورة</button>
-<button class="btn-carry" onclick="carryForward()">ترحيل للاسبوع القادم</button>
-<button onclick="window.print()">🖨️ طباعة</button>
+<div id="output" class="box"></div>
 
-<div id="result"></div>
-<h2 style="color:#00e5ff;text-align:center">سجل الفواتير</h2>
-<div id="history" class="history"></div>
-
-</div>
 <script>
-let subCount=0;
-document.getElementById('date').valueAsDate = new Date();
-let data = JSON.parse(localStorage.getItem('voltpro_data')) || {subscribers:{}, bills:[]};
+let users = [];
 
-function addSubscriber(name="", prev=0){
-  subCount++;
-  document.getElementById('subscribers').innerHTML+=`
-  <div class="subscriber" id="sub${subCount}">
-    <label>اسم المشترك ${subCount}</label><input id="name${subCount}" value="${name}" placeholder="الاسم">
-    <div class="row">
-      <div><label>القراءة السابقة</label><input type="number" id="subPrev${subCount}" value="${prev}"></div>
-      <div><label>القراءة الحالية</label><input type="number" id="subCurrent${subCount}"></div>
-    </div>
-    <div class="row">
-      <div><label>دفعة هذا الاسبوع</label><input type="number" id="payment${subCount}" placeholder="0"></div>
-      <div><label>تاريخ الدفعة</label><input type="date" id="payDate${subCount}"></div>
-    </div>
-    <div id="balance${subCount}" class="payment-box"></div>
-  </div>`;
-}
-
-function calculateAndSave(){
-  let price=+document.getElementById('price').value;
-  let date=document.getElementById('date').value;
-  let mainPrev=+document.getElementById('prev').value;
-  let mainCurrent=+document.getElementById('current').value;
-  let totalMainKwh = mainCurrent - mainPrev;
-
-  let totalSubsKwh = 0;
-  let subsData = [];
-
-  // 1. نحسب استهلاك كل واحد
-  for(let i=1;i<=subCount;i++){
-    let name=document.getElementById(`name${i}`).value;
-    let prev=+document.getElementById(`subPrev${i}`).value;
-    let current=+document.getElementById(`subCurrent${i}`).value;
-    let kwh = current - prev;
-    if(kwh<0) kwh=0;
-    totalSubsKwh += kwh;
-    subsData.push({id:i, name, prev, current, kwh});
-  }
-
-  // 2. نحسب الفاقد ونوزعه نسبة وتناسب
-  let lossKwh = totalMainKwh - totalSubsKwh;
-  let html=`<h3>فاتورة ${date}</h3><p>الرئيسي: ${totalMainKwh.toFixed(1)}ك | الفرعي: ${totalSubsKwh.toFixed(1)}ك | الفاقد: ${lossKwh.toFixed(1)}ك</p><hr>`;
-
-  subsData.forEach(sub=>{
-    // نسبة المشترك من الاستهلاك
-    let ratio = totalSubsKwh > 0? sub.kwh / totalSubsKwh : 0;
-    let lossShare = lossKwh * ratio; // حصته من الفاقد
-    let totalKwhWithLoss = sub.kwh + lossShare;
-    let billAmount = totalKwhWithLoss * price;
-
-    // 3. نحسب الرصيد والدفعات
-    let payment = +document.getElementById(`payment${sub.id}`).value || 0;
-    let payDate = document.getElementById(`payDate${sub.id}`).value;
-    let oldBalance = data.subscribers[sub.name]?.balance || 0;
-    let newBalance = oldBalance + billAmount - payment; // موجب = عليه، سالب = اله
-
-    // حفظ بيانات المشترك
-    data.subscribers[sub.name] = {balance: newBalance, lastCurrent: sub.current};
-
-    let balanceText = newBalance > 0? `عليه: ${newBalance.toFixed(2)} ش` : `له رصيد: ${Math.abs(newBalance).toFixed(2)} ش`;
-    let balanceClass = newBalance > 0? 'negative' : 'positive';
-
-    html += `<p><b>${sub.name}</b><br>
-    استهلاك: ${sub.kwh.toFixed(1)}ك + فاقد: ${lossShare.toFixed(2)}ك = ${totalKwhWithLoss.toFixed(1)}ك<br>
-    الفاتورة: ${billAmount.toFixed(2)} ش - دفعة: ${payment} ش = <span class="${balanceClass}">${balanceText}</span></p>`;
-
-    document.getElementById(`balance${sub.id}`).innerHTML = `<b class="${balanceClass}">${balanceText}</b>`;
-  });
-
-  document.getElementById('result').innerHTML=html;
-  document.getElementById('result').style.display='block';
-
-  // 4. حفظ الفاتورة
-  data.bills.push({date, totalMainKwh, lossKwh, subs:subsData});
-  localStorage.setItem('voltpro_data', JSON.stringify(data));
-  loadHistory();
-  alert("تم الحساب والحفظ ✅");
-}
-
-function carryForward(){
-  // ترحيل القراءة الحالية لتصبح السابقة
-  document.getElementById('prev').value = document.getElementById('current').value;
-  for(let i=1;i<=subCount;i++){
-    let current = document.getElementById(`subCurrent${i}`).value;
-    document.getElementById(`subPrev${i}`).value = current;
-    document.getElementById(`subCurrent${i}`).value = '';
-    document.getElementById(`payment${i}`).value = '';
-  }
-  document.getElementById('current').value = '';
-  alert("تم الترحيل. القراءات الحالية صارت السابقة للاسبوع الجاي");
-}
-
-function loadHistory(){
-  let html = '';
-  data.bills.reverse().forEach(b=>{
-    html += `<div style="border-bottom:1px dashed #00e5ff;padding:5px 0"><b>${b.date}</b> - فاقد: ${b.lossKwh.toFixed(1)}ك</div>`;
-  })
-  document.getElementById('history').innerHTML = html || "لا يوجد";
-}
-
-// تحميل المشتركين المحفوظين اول ما يفتح
-Object.keys(data.subscribers).forEach(name=>{
-  addSubscriber(name, data.subscribers[name].lastCurrent);
-})
-if(subCount==0) addSubscriber();
-</script>
-</body>
-</html>
+function addUser(){
+  let id = users.length + 1;
+  users.push({id:id});
+  document.getElementById('users').innerHTML += `
+  <div class="box" id="user${id}">
+    <h3>المشترك ${id}</h3>
+    الاسم: <input type="text" id="name${id}"><br>
+    القراءة السابقة: <input type="number" id="prev${id}"><br>
+    القراءة الحالية: <input type="number" id="curr${id}"><br>
+    دفعة هذا الاسبوع: <input
