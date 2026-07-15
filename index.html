@@ -3,81 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VoltPro - نظام فواتير</title>
+<title>VoltPro</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-  body {background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);font-family: 'Cairo', sans-serif;color: #fff;display: flex;justify-content: center;align-items: start;min-height: 100vh;margin: 0;padding: 20px;}
-  .container {background: rgba(255, 255, 255, 0.05);backdrop-filter: blur(20px);border: 1px solid rgba(0, 200, 255, 0.3);border-radius: 25px;padding: 25px;width: 100%;max-width: 500px;box-shadow: 0 0 40px rgba(0, 200, 255, 0.4);}
-  h1 {text-align: center;color: #00e5ff;text-shadow: 0 0 15px #00e5ff;font-size: 24px;margin-bottom: 20px;}
-  label {display: block;margin: 10px 0 5px;font-weight: 700;color: #a0e9ff;font-size: 14px;}
-  input {width: 100%;padding: 12px;background: rgba(0,0,0,0.3);border: 1px solid #00e5ff;border-radius: 12px;color: #fff;font-size: 16px;outline: none;box-sizing: border-box;}
-  input:focus {box-shadow: 0 0 15px #00e5ff;}
-  .row {display: flex;gap: 15px;}
-  .row div {flex: 1;}
-  button {width: 100%;padding: 15px;margin-top: 15px;background: linear-gradient(90deg, #00c6ff, #0072ff);border: none;border-radius: 15px;color: #fff;font-size: 18px;font-weight: 700;cursor: pointer;box-shadow: 0 0 20px rgba(0, 114, 255, 0.6);}
-  button:hover {transform: scale(1.02);}
-  .btn-add {background: linear-gradient(90deg, #7F00FF, #E100FF);box-shadow: 0 0 20px rgba(225, 0, 255, 0.6);}
-  h2 {text-align: center;margin: 20px 0 10px;color: #ff00ff;text-shadow: 0 0 10px #ff00ff;}
-  .subscriber {background: rgba(0,0,0,0.2);padding: 10px;border-radius: 10px;margin-top: 10px;border: 1px solid #ff00ff;}
-  #result {margin-top: 20px;padding: 15px;background: rgba(0,255,0,0.1);border-radius: 15px;border: 1px solid #00ff88;display: none;}
+body{background:linear-gradient(135deg, #0f0c29, #302b63, #24243e);font-family:Arial;color:#fff;display:flex;justify-content:center;padding:20px}
+.container{background:rgba(255,255,255,.05);border:1px solid #00e5ff;border-radius:25px;padding:25px;width:100%;max-width:500px}
+h1{text-align:center;color:#00e5ff}
+input{width:100%;padding:12px;margin:5px 0;background:#000;border:1px solid #00e5ff;border-radius:12px;color:#fff;box-sizing:border-box}
+button{width:100%;padding:15px;margin-top:15px;background:linear-gradient(90deg,#00c6ff,#0072ff);border:none;border-radius:15px;color:#fff;font-size:18px;font-weight:700;cursor:pointer}
+.btn-add{background:linear-gradient(90deg,#7F00FF,#E100FF)}
+.subscriber{border:1px solid #ff00ff;padding:10px;border-radius:10px;margin-top:10px}
+#result{margin-top:20px;padding:15px;background:rgba(0,255,0,.1);border:1px solid #00ff88;display:none}
+.row{display:flex;gap:10px}
 </style>
 </head>
 <body>
-
 <div class="container">
-  <h1>⚡ نظام حساب فواتير الكهرباء Pro</h1>
-  
-  <div class="row">
-    <div>
-      <label>سعر الكيلو بالشيكل</label>
-      <input type="number" id="price" value="0.65" step="0.01">
-    </div>
-    <div>
-      <label>تاريخ القراءة</label>
-      <input type="date" id="date">
-    </div>
-  </div>
-  
-  <div class="row">
-    <div>
-      <label>القراءة السابقة</label>
-      <input type="number" id="prev" value="2874.1" step="0.1">
-    </div>
-    <div>
-      <label>القراءة الحالية</label>
-      <input type="number" id="current" value="3000" step="0.1">
-    </div>
-  </div>
-  
-  <h2>بيانات المشتركين</h2>
-  <div id="subscribers"></div>
-  
-  <button class="btn-add" onclick="addSubscriber()">+ اضافة مشترك</button>
-  <button onclick="calculate()">احسب الفواتير</button>
-
-  <div id="result"></div>
+<h1>⚡ VoltPro</h1>
+<div class="row">
+<div><label>سعر الكيلو</label><input type="number" id="price" value="0.65"></div>
+<div><label>التاريخ</label><input type="date" id="date"></div>
 </div>
-
+<div class="row">
+<div><label>السابقة</label><input type="number" id="prev" value="2874.1"></div>
+<div><label>الحالية</label><input type="number" id="current" value="3000"></div>
+</div>
+<h2 style="color:#ff00ff;text-align:center">بيانات المشتركين</h2>
+<div id="subscribers"></div>
+<button class="btn-add" onclick="addSubscriber()">+ اضافة مشترك</button>
+<button onclick="calculate()">احسب الفواتير</button>
+<div id="result"></div>
+</div>
 <script>
-let subCount = 0;
-
+let subCount=0;
 function addSubscriber(){
   subCount++;
-  document.getElementById('subscribers').innerHTML += `
-    <div class="subscriber" id="sub${subCount}">
-      <label>اسم المشترك ${subCount}</label>
-      <input type="text" id="name${subCount}" placeholder="اكتب الاسم">
-      <label>عدد الكيلوات للمشترك</label>
-      <input type="number" id="kwh${subCount}" placeholder="0">
-    </div>
-  `;
+  document.getElementById('subscribers').innerHTML+=`<div class="subscriber"><label>اسم ${subCount}</label><input id="name${subCount}"><label>كيلوات</label><input type="number" id="kwh${subCount}"></div>`;
 }
-
 function calculate(){
-  let price = parseFloat(document.getElementById('price').value);
-  let prev = parseFloat(document.getElementById('prev').value);
-  let current = parseFloat(document.getElementById('current').value);
-  
-  if(!price || !current){ alert("دخل سعر الكيلو والقراءة الحالية"); return; }
-  
-  let totalKwh =
+  let price=+document.getElementById('price').value;
+  let totalKwh=+document.getElementById('current').value - +document.getElementById('prev').value;
+  let html=`<h3>الاجمالي: ${totalKwh} كيلو = ${(totalKwh*price).toFixed(2)} شيكل</h3><hr>`;
+  for(let i=1;i<=subCount;i++){
+    let name=document.getElementById(`name${i}`).value||`مشترك ${i}`;
+    let kwh=+document.getElementById(`kwh${i}`).value||0;
+    html+=`<p><b>${name}</b>: ${kwh} كيلو = ${(kwh*price).toFixed(2)} شيكل</p>`;
+  }
+  document.getElementById('result').innerHTML=html;
+  document.getElementById('result').style.display='block';
+}
+</script>
+</body>
+</html>
