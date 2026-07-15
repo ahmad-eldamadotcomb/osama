@@ -1,116 +1,165 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VoltPro - حفظ تلقائي</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoltPro Pro - نظام محاسبة كامل</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-body{background:linear-gradient(135deg, #0f0c29, #302b63, #24243e);font-family:'Cairo';color:#fff;display:flex;justify-content:center;padding:20px}
-.container{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid #00e5ff;border-radius:25px;padding:25px;width:100%;max-width:500px}
-h1{text-align:center;color:#00e5ff;text-shadow:0 0 15px #00e5ff}
-input{width:100%;padding:12px;margin:5px 0;background:rgba(0,0,0,.3);border:1px solid #00e5ff;border-radius:12px;color:#fff;box-sizing:border-box}
-button{width:100%;padding:15px;margin-top:10px;background:linear-gradient(90deg,#00c6ff,#0072ff);border:none;border-radius:15px;color:#fff;font-size:18px;font-weight:700;cursor:pointer}
+*{font-family:'Cairo'}
+body{background:linear-gradient(135deg, #0f0c29, #302b63);color:#fff;display:flex;justify-content:center;padding:15px;margin:0}
+.container{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid #00e5ff;border-radius:25px;padding:20px;width:100%;max-width:650px}
+h1{text-align:center;color:#00e5ff}
+label{display:block;margin:8px 0 4px;font-weight:700;color:#a0e9ff;font-size:14px}
+input{width:100%;padding:10px;background:rgba(0,0,0,.3);border:1px solid #00e5ff;border-radius:10px;color:#fff;box-sizing:border-box}
+button{width:100%;padding:14px;margin-top:8px;background:linear-gradient(90deg,#00c6ff,#0072ff);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
 .btn-add{background:linear-gradient(90deg,#7F00FF,#E100FF)}
-.subscriber{border:1px solid #ff00ff;padding:10px;border-radius:10px;margin-top:10px}
-#result{margin-top:20px;padding:15px;background:rgba(0,255,0,.1);border:1px solid #00ff88;display:none;border-radius:15px}
-.row{display:flex;gap:10px}
-.history{background:rgba(0,0,0,.2);margin-top:15px;padding:10px;border-radius:10px;border:1px solid #00e5ff}
-.history-item{border-bottom:1px dashed #00e5ff;padding:8px 0}
-.del{float:left;background:red;color:#fff;border:none;border-radius:8px;padding:3px 8px;cursor:pointer}
+.btn-carry{background:linear-gradient(90deg,#ff8a00,#e52e71)}
+.subscriber{border:1px solid #ff00ff;padding:12px;border-radius:10px;margin-top:10px;background:rgba(0,0,0,0.2)}
+.row{display:flex;gap:8px}
+.row div{flex:1}
+#result{margin-top:15px;padding:15px;background:rgba(0,255,0,.1);border:1px solid #00ff88;display:none;border-radius:15px}
+.history{margin-top:15px;padding:10px;border-radius:10px;border:1px solid #00e5ff;max-height:250px;overflow-y:auto;font-size:13px}
+.payment-box{background:rgba(0,255,136,0.1);padding:8px;border-radius:8px;margin-top:5px}
+.negative{color:#ff5252}.positive{color:#00ff88}
+@media print{body{background:#fff;color:#000}.container{border:none} button{display:none}}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>⚡ VoltPro</h1>
-<div class="row">
-<div><label>سعر الكيلو</label><input type="number" id="price" value="0.65"></div>
-<div><label>التاريخ</label><input type="date" id="date"></div>
-</div>
-<div class="row">
-<div><label>السابقة</label><input type="number" id="prev" value="2874.1"></div>
-<div><label>الحالية</label><input type="number" id="current" value="3000"></div>
-</div>
-<h2 style="color:#ff00ff;text-align:center">بيانات المشتركين</h2>
-<div id="subscribers"></div>
-<button class="btn-add" onclick="addSubscriber()">+ اضافة مشترك</button>
-<button onclick="calculateAndSave()">احسب الفواتير</button>
-<div id="result"></div>
+<h1>⚡ VoltPro Pro - محاسبة</h1>
 
+<div class="row">
+<div><label>سعر الكيلو</label><input type="number" id="price" value="0.65" step="0.01"></div>
+<div><label>تاريخ القراءة</label><input type="date" id="date"></div>
+</div>
+
+<div class="row">
+<div><label>الرئيسية السابقة</label><input type="number" id="prev"></div>
+<div><label>الرئيسية الحالية</label><input type="number" id="current"></div>
+</div>
+
+<h2 style="color:#ff00ff;text-align:center">المشتركين</h2>
+<div id="subscribers"></div>
+
+<button class="btn-add" onclick="addSubscriber()">+ اضافة مشترك</button>
+<button onclick="calculateAndSave()">احسب الفاتورة</button>
+<button class="btn-carry" onclick="carryForward()">ترحيل للاسبوع القادم</button>
+<button onclick="window.print()">🖨️ طباعة</button>
+
+<div id="result"></div>
 <h2 style="color:#00e5ff;text-align:center">سجل الفواتير</h2>
-<button onclick="clearHistory()" style="background:red">مسح كل السجل</button>
 <div id="history" class="history"></div>
 
 </div>
 <script>
 let subCount=0;
+document.getElementById('date').valueAsDate = new Date();
+let data = JSON.parse(localStorage.getItem('voltpro_data')) || {subscribers:{}, bills:[]};
 
-function addSubscriber(){
+function addSubscriber(name="", prev=0){
   subCount++;
-  document.getElementById('subscribers').innerHTML+=`<div class="subscriber"><label>اسم ${subCount}</label><input id="name${subCount}" placeholder="اسم المشترك"><label>كيلوات</label><input type="number" id="kwh${subCount}" placeholder="0"></div>`;
+  document.getElementById('subscribers').innerHTML+=`
+  <div class="subscriber" id="sub${subCount}">
+    <label>اسم المشترك ${subCount}</label><input id="name${subCount}" value="${name}" placeholder="الاسم">
+    <div class="row">
+      <div><label>القراءة السابقة</label><input type="number" id="subPrev${subCount}" value="${prev}"></div>
+      <div><label>القراءة الحالية</label><input type="number" id="subCurrent${subCount}"></div>
+    </div>
+    <div class="row">
+      <div><label>دفعة هذا الاسبوع</label><input type="number" id="payment${subCount}" placeholder="0"></div>
+      <div><label>تاريخ الدفعة</label><input type="date" id="payDate${subCount}"></div>
+    </div>
+    <div id="balance${subCount}" class="payment-box"></div>
+  </div>`;
 }
 
 function calculateAndSave(){
   let price=+document.getElementById('price').value;
   let date=document.getElementById('date').value;
-  let prev=+document.getElementById('prev').value;
-  let current=+document.getElementById('current').value;
-  
-  if(!price || !current){ alert("دخل سعر الكيلو والقراءة الحالية"); return; }
-  if(!date){ alert("اختار التاريخ"); return; }
-  
-  let totalKwh=current - prev;
-  let totalBill=totalKwh*price;
-  let subs=[];
-  let html=`<h3>تاريخ: ${date}</h3><h3>الاجمالي: ${totalKwh.toFixed(1)} كيلو = ${totalBill.toFixed(2)} شيكل</h3><hr>`;
-  
+  let mainPrev=+document.getElementById('prev').value;
+  let mainCurrent=+document.getElementById('current').value;
+  let totalMainKwh = mainCurrent - mainPrev;
+
+  let totalSubsKwh = 0;
+  let subsData = [];
+
+  // 1. نحسب استهلاك كل واحد
   for(let i=1;i<=subCount;i++){
-    let name=document.getElementById(`name${i}`).value||`مشترك ${i}`;
-    let kwh=+document.getElementById(`kwh${i}`).value||0;
-    subs.push({name,kwh,bill:(kwh*price).toFixed(2)})
-    html+=`<p><b>${name}</b>: ${kwh} كيلو = ${(kwh*price).toFixed(2)} شيكل</p>`;
+    let name=document.getElementById(`name${i}`).value;
+    let prev=+document.getElementById(`subPrev${i}`).value;
+    let current=+document.getElementById(`subCurrent${i}`).value;
+    let kwh = current - prev;
+    if(kwh<0) kwh=0;
+    totalSubsKwh += kwh;
+    subsData.push({id:i, name, prev, current, kwh});
   }
+
+  // 2. نحسب الفاقد ونوزعه نسبة وتناسب
+  let lossKwh = totalMainKwh - totalSubsKwh;
+  let html=`<h3>فاتورة ${date}</h3><p>الرئيسي: ${totalMainKwh.toFixed(1)}ك | الفرعي: ${totalSubsKwh.toFixed(1)}ك | الفاقد: ${lossKwh.toFixed(1)}ك</p><hr>`;
+
+  subsData.forEach(sub=>{
+    // نسبة المشترك من الاستهلاك
+    let ratio = totalSubsKwh > 0? sub.kwh / totalSubsKwh : 0;
+    let lossShare = lossKwh * ratio; // حصته من الفاقد
+    let totalKwhWithLoss = sub.kwh + lossShare;
+    let billAmount = totalKwhWithLoss * price;
+
+    // 3. نحسب الرصيد والدفعات
+    let payment = +document.getElementById(`payment${sub.id}`).value || 0;
+    let payDate = document.getElementById(`payDate${sub.id}`).value;
+    let oldBalance = data.subscribers[sub.name]?.balance || 0;
+    let newBalance = oldBalance + billAmount - payment; // موجب = عليه، سالب = اله
+
+    // حفظ بيانات المشترك
+    data.subscribers[sub.name] = {balance: newBalance, lastCurrent: sub.current};
+
+    let balanceText = newBalance > 0? `عليه: ${newBalance.toFixed(2)} ش` : `له رصيد: ${Math.abs(newBalance).toFixed(2)} ش`;
+    let balanceClass = newBalance > 0? 'negative' : 'positive';
+
+    html += `<p><b>${sub.name}</b><br>
+    استهلاك: ${sub.kwh.toFixed(1)}ك + فاقد: ${lossShare.toFixed(2)}ك = ${totalKwhWithLoss.toFixed(1)}ك<br>
+    الفاتورة: ${billAmount.toFixed(2)} ش - دفعة: ${payment} ش = <span class="${balanceClass}">${balanceText}</span></p>`;
+
+    document.getElementById(`balance${sub.id}`).innerHTML = `<b class="${balanceClass}">${balanceText}</b>`;
+  });
+
   document.getElementById('result').innerHTML=html;
   document.getElementById('result').style.display='block';
-  
-  // الحفظ التلقائي هان
-  let billData = {id:Date.now(), date, price, totalKwh, totalBill:totalBill.toFixed(2), subs}
-  let bills = JSON.parse(localStorage.getItem('voltpro_bills')) || [];
-  bills.push(billData);
-  localStorage.setItem('voltpro_bills', JSON.stringify(bills));
-  
-  alert("تم حساب وحفظ الفاتورة ✅");
+
+  // 4. حفظ الفاتورة
+  data.bills.push({date, totalMainKwh, lossKwh, subs:subsData});
+  localStorage.setItem('voltpro_data', JSON.stringify(data));
   loadHistory();
+  alert("تم الحساب والحفظ ✅");
+}
+
+function carryForward(){
+  // ترحيل القراءة الحالية لتصبح السابقة
+  document.getElementById('prev').value = document.getElementById('current').value;
+  for(let i=1;i<=subCount;i++){
+    let current = document.getElementById(`subCurrent${i}`).value;
+    document.getElementById(`subPrev${i}`).value = current;
+    document.getElementById(`subCurrent${i}`).value = '';
+    document.getElementById(`payment${i}`).value = '';
+  }
+  document.getElementById('current').value = '';
+  alert("تم الترحيل. القراءات الحالية صارت السابقة للاسبوع الجاي");
 }
 
 function loadHistory(){
-  let bills = JSON.parse(localStorage.getItem('voltpro_bills')) || [];
   let html = '';
-  bills.reverse().forEach(b=>{
-    html += `<div class="history-item">
-    <button class="del" onclick="deleteBill(${b.id})">حذف</button>
-    <b>${b.date}</b> - الاجمالي: ${b.totalBill} شيكل<br>`;
-    b.subs.forEach(s=> html += `${s.name}: ${s.bill} شيكل<br>`);
-    html += `</div>`;
+  data.bills.reverse().forEach(b=>{
+    html += `<div style="border-bottom:1px dashed #00e5ff;padding:5px 0"><b>${b.date}</b> - فاقد: ${b.lossKwh.toFixed(1)}ك</div>`;
   })
-  document.getElementById('history').innerHTML = html || "لا يوجد فواتير محفوظة";
+  document.getElementById('history').innerHTML = html || "لا يوجد";
 }
 
-function deleteBill(id){
-  let bills = JSON.parse(localStorage.getItem('voltpro_bills')) || [];
-  bills = bills.filter(b=> b.id != id);
-  localStorage.setItem('voltpro_bills', JSON.stringify(bills));
-  loadHistory();
-}
-
-function clearHistory(){
-  if(confirm("متأكد بدك تمسح كل الفواتير؟")){
-    localStorage.removeItem('voltpro_bills');
-    loadHistory();
-  }
-}
-
-loadHistory(); // يحمل السجل اول ما تفتح الصفحة
+// تحميل المشتركين المحفوظين اول ما يفتح
+Object.keys(data.subscribers).forEach(name=>{
+  addSubscriber(name, data.subscribers[name].lastCurrent);
+})
+if(subCount==0) addSubscriber();
 </script>
 </body>
 </html>
