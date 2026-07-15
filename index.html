@@ -3,105 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام فواتير الكهرباء Pro</title>
+<title>VoltPro - نظام فواتير</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-  
-  body {
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    font-family: 'Cairo', sans-serif;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-  }
-  
-  .container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 200, 255, 0.3);
-    border-radius: 25px;
-    padding: 30px;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 0 40px rgba(0, 200, 255, 0.4);
-  }
-  
-  h1 {
-    text-align: center;
-    color: #00e5ff;
-    text-shadow: 0 0 15px #00e5ff;
-    font-size: 26px;
-    margin-bottom: 25px;
-  }
-  
-  label {
-    display: block;
-    margin: 15px 0 5px;
-    font-weight: 700;
-    color: #a0e9ff;
-    font-size: 14px;
-  }
-  
-  input, select {
-    width: 100%;
-    padding: 12px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid #00e5ff;
-    border-radius: 12px;
-    color: #fff;
-    font-size: 16px;
-    outline: none;
-    transition: 0.3s;
-    box-sizing: border-box;
-  }
-  
-  input:focus {
-    box-shadow: 0 0 15px #00e5ff;
-    border-color: #00e5ff;
-  }
-  
-  .row {
-    display: flex;
-    gap: 15px;
-  }
-  
-  .row div { flex: 1; }
-  
-  button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 20px;
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
-    border: none;
-    border-radius: 15px;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 0 20px rgba(0, 114, 255, 0.6);
-    transition: 0.3s;
-  }
-  
-  button:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 30px rgba(0, 114, 255, 0.9);
-  }
-  
-  .btn-add {
-    background: linear-gradient(90deg, #7F00FF, #E100FF);
-    box-shadow: 0 0 20px rgba(225, 0, 255, 0.6);
-  }
-  
-  h2 {
-    text-align: center;
-    margin: 25px 0 15px;
-    color: #ff00ff;
-    text-shadow: 0 0 10px #ff00ff;
-  }
+  body {background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);font-family: 'Cairo', sans-serif;color: #fff;display: flex;justify-content: center;align-items: start;min-height: 100vh;margin: 0;padding: 20px;}
+  .container {background: rgba(255, 255, 255, 0.05);backdrop-filter: blur(20px);border: 1px solid rgba(0, 200, 255, 0.3);border-radius: 25px;padding: 25px;width: 100%;max-width: 500px;box-shadow: 0 0 40px rgba(0, 200, 255, 0.4);}
+  h1 {text-align: center;color: #00e5ff;text-shadow: 0 0 15px #00e5ff;font-size: 24px;margin-bottom: 20px;}
+  label {display: block;margin: 10px 0 5px;font-weight: 700;color: #a0e9ff;font-size: 14px;}
+  input {width: 100%;padding: 12px;background: rgba(0,0,0,0.3);border: 1px solid #00e5ff;border-radius: 12px;color: #fff;font-size: 16px;outline: none;box-sizing: border-box;}
+  input:focus {box-shadow: 0 0 15px #00e5ff;}
+  .row {display: flex;gap: 15px;}
+  .row div {flex: 1;}
+  button {width: 100%;padding: 15px;margin-top: 15px;background: linear-gradient(90deg, #00c6ff, #0072ff);border: none;border-radius: 15px;color: #fff;font-size: 18px;font-weight: 700;cursor: pointer;box-shadow: 0 0 20px rgba(0, 114, 255, 0.6);}
+  button:hover {transform: scale(1.02);}
+  .btn-add {background: linear-gradient(90deg, #7F00FF, #E100FF);}
+  h2 {text-align: center;margin: 20px 0 10px;color: #ff00ff;text-shadow: 0 0 10px #ff00ff;}
+  .subscriber {background: rgba(0,0,0,0.2);padding: 10px;border-radius: 10px;margin-top: 10px;border: 1px solid #ff00ff;}
+  #result {margin-top: 20px;padding: 15px;background: rgba(0,255,0,0.1);border-radius: 15px;border: 1px solid #00ff88;display: none;}
 </style>
 </head>
 <body>
@@ -112,7 +30,7 @@
   <div class="row">
     <div>
       <label>سعر الكيلو بالشيكل</label>
-      <input type="number" id="price" placeholder="0.00" step="0.01">
+      <input type="number" id="price" placeholder="0.65" step="0.01">
     </div>
     <div>
       <label>تاريخ القراءة</label>
@@ -132,16 +50,6 @@
   </div>
   
   <h2>بيانات المشتركين</h2>
+  <div id="subscribers"></div>
   
-  <button class="btn-add">+ اضافة مشترك</button>
-  <button onclick="calculate()">احسب الفواتير</button>
-</div>
-
-<script>
-function calculate(){
-  alert("تم الحساب! هنضيف الكود هسا");
-}
-</script>
-
-</body>
-  </html>
+  <button class="btn-add" onclick="addSubscriber()">+ اضافة مشتر
