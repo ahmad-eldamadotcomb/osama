@@ -5,38 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VoltPro Pro</title>
 <style>
-body{background:#0a0a1a;color:#fff;font-family:'Arial';padding:10px}
-.box{background:#141428;border:1px solid #00f5ff;border-radius:15px;padding:15px;margin:10px 0;box-shadow:0 0 10px #00f5ff33}
-input,select{width:48%;padding:10px;margin:5px 1%;background:#0a0a1a;color:#fff;border:1px solid #00f5ff;border-radius:10px;text-align:center}
-.btn{width:100%;padding:14px;margin:8px 0;border:none;border-radius:12px;font-weight:bold;font-size:16px;cursor:pointer}
+*{box-sizing:border-box}
+body{background:linear-gradient(135deg,#0a0a1a,#1a1a3a);color:#fff;font-family:'Tahoma';padding:10px;margin:0}
+.container{max-width:600px;margin:auto}
+.box{background:#141428;border:2px solid #00f5ff;border-radius:15px;padding:15px;margin:12px 0;box-shadow:0 0 20px #00f5ff44}
+h2{text-align:center;color:#00f5ff;text-shadow:0 0 10px #00f5ff}
+h3{color:#00f5ff;text-align:right;border-bottom:1px solid #00f5ff;padding-bottom:5px;margin:0 0 10px 0}
+label{display:block;text-align:right;margin:8px 0 4px;font-size:14px;color:#a5f3fc}
+input{width:100%;padding:12px;background:#0a0a1a;color:#fff;border:2px solid #00f5ff;border-radius:10px;text-align:right;font-size:16px}
+input:focus{outline:none;box-shadow:0 0 10px #00f5ff}
+.row{display:flex;gap:10px}
+.row .col{width:50%}
+.btn{width:100%;padding:16px;margin:8px 0;border:none;border-radius:12px;font-weight:bold;font-size:18px;cursor:pointer;color:#fff;transition:0.3s}
+.btn:hover{transform:scale(1.02)}
 .btn1{background:linear-gradient(90deg,#a855f7,#ec4899)}
 .btn2{background:linear-gradient(90deg,#06b6d4,#3b82f6)}
 .btn3{background:linear-gradient(90deg,#f97316,#ef4444)}
-.btn4{background:linear-gradient(90deg,#06b6d4,#3b82f6)}
-.result{color:#22c55e;font-size:18px}
-.debt{color:#ef4444;font-size:18px}
-h3{color:#00f5ff}
+.btn4{background:linear-gradient(90deg,#10b981,#059669)}
+.result-box{background:#0a0a1a;padding:12px;border-radius:10px;margin-top:10px;border:1px dashed #00f5ff;text-align:center;font-size:18px;font-weight:bold}
+.debt{color:#ef4444}
+.credit{color:#22c55e}
+.output{background:#141428;border:2px solid #22c55e;border-radius:15px;padding:15px;margin-top:15px}
 </style>
 </head>
 <body>
-<h2 style="text-align:center">⚡ VoltPro Pro</h2>
+<div class="container">
+<h2>⚡ VoltPro Pro v2.0</h2>
 
 <div class="box">
 <h3>البيانات الرئيسية</h3>
-سعر الكيلو: <input type="number" id="price" value="27">
-تاريخ الفاتورة: <input type="date" id="date">
-القراءة السابقة: <input type="number" id="mainPrev">
-القراءة الحالية: <input type="number" id="mainCurr">
+<label>سعر الكيلو بالشيكل</label>
+<input type="number" id="price" value="27" step="0.01">
+<div class="row">
+  <div class="col">
+    <label>القراءة السابقة للعداد الرئيسي</label>
+    <input type="number" id="mainPrev" step="0.01">
+  </div>
+  <div class="col">
+    <label>القراءة الحالية للعداد الرئيسي</label>
+    <input type="number" id="mainCurr" step="0.01">
+  </div>
+</div>
+<label>تاريخ الفاتورة</label>
+<input type="date" id="date">
 </div>
 
 <div id="users"></div>
 
-<button class="btn btn1" onclick="addUser()">+ اضافة مشترك</button>
+<button class="btn btn1" onclick="addUser()">+ اضافة مشترك جديد</button>
 <button class="btn btn2" onclick="calc()">احسب الفاتورة</button>
 <button class="btn btn3" onclick="nextWeek()">ترحيل للاسبوع القادم</button>
-<button class="btn btn4" onclick="window.print()">طباعة 🖨️</button>
+<button class="btn btn4" onclick="window.print()">طباعة الفاتورة 🖨️</button>
 
-<div id="output" class="box"></div>
+<div id="output" class="output" style="display:none"></div>
+</div>
 
 <script>
 let users = [];
@@ -45,42 +67,75 @@ function addUser(){
   users.push({id});
   document.getElementById('users').innerHTML += `
   <div class="box">
-    <h3>اسم المشترك ${id}</h3>
-    <input type="text" id="name${id}" placeholder="الاسم">
-    القراءة السابقة <input type="number" id="prev${id}">
-    القراءة الحالية <input type="number" id="curr${id}">
-    دفعة هذا الاسبوع <input type="number" id="pay${id}" value="0">
-    تاريخ الدفعة <input type="date" id="payDate${id}">
-    <div id="res${id}"></div>
+    <h3>بيانات المشترك ${id}</h3>
+    <label>اسم المشترك</label>
+    <input type="text" id="name${id}" placeholder="اكتب اسم المشترك">
+    <div class="row">
+      <div class="col">
+        <label>القراءة السابقة</label>
+        <input type="number" id="prev${id}" step="0.01">
+      </div>
+      <div class="col">
+        <label>القراءة الحالية</label>
+        <input type="number" id="curr${id}" step="0.01">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label>دفعة هذا الاسبوع ش</label>
+        <input type="number" id="pay${id}" value="0" step="0.01">
+      </div>
+      <div class="col">
+        <label>تاريخ الدفعة</label>
+        <input type="date" id="payDate${id}">
+      </div>
+    </div>
+    <div class="result-box" id="res${id}">النتيجة هتظهر هنا</div>
   </div>`;
 }
 
 function calc(){
-  let price = +document.getElementById('price').value;
-  let mainTotal = (+document.getElementById('mainCurr').value) - (+document.getElementById('mainPrev').value);
-  let usersTotal = 0; let data = [];
+  let price = parseFloat(document.getElementById('price').value) || 0;
+  let mainPrev = parseFloat(document.getElementById('mainPrev').value) || 0;
+  let mainCurr = parseFloat(document.getElementById('mainCurr').value) || 0;
+  let mainTotal = mainCurr - mainPrev;
+  
+  let usersTotal = 0; 
+  let data = [];
   
   for(let u of users){
-    let use = (+document.getElementById('curr'+u.id).value) - (+document.getElementById('prev'+u.id).value);
-    usersTotal += use; data.push({id:u.id,use});
+    let prev = parseFloat(document.getElementById('prev'+u.id).value) || 0;
+    let curr = parseFloat(document.getElementById('curr'+u.id).value) || 0;
+    let use = curr - prev;
+    if(use < 0) use = 0;
+    usersTotal += use; 
+    data.push({id:u.id,use});
   }
   
   let loss = mainTotal - usersTotal;
-  let lossAbs = Math.abs(loss); // هنا سر التعديل - الفقد دايما موجب
+  let lossAbs = Math.abs(loss); // الفقد دايما موجب
   
-  let html = `<h3>فاتورة ${document.getElementById('date').value}</h3>`;
-  html += `الرئيسي: ${mainTotal.toFixed(1)}ك | الفرعي: ${usersTotal.toFixed(1)}ك | الفاقد: ${lossAbs.toFixed(1)}ك <hr>`;
+  document.getElementById('output').style.display='block';
+  let html = `<h3>ملخص الفاتورة - ${document.getElementById('date').value}</h3>`;
+  html += `<p style="text-align:center">اجمالي الرئيسي: <b>${mainTotal.toFixed(2)} ك</b> | اجمالي الفرعي: <b>${usersTotal.toFixed(2)} ك</b> | الفاقد: <b>${lossAbs.toFixed(2)} ك</b></p><hr>`;
   
   for(let d of data){
-    let name = document.getElementById('name'+d.id).value;
-    let pay = +document.getElementById('pay'+d.id).value || 0;
+    let name = document.getElementById('name'+d.id).value || `مشترك ${d.id}`;
+    let pay = parseFloat(document.getElementById('pay'+d.id).value) || 0;
+    
+    // توزيع الفقد نسبي
     let lossShare = usersTotal > 0 ? (d.use / usersTotal) * lossAbs : 0;
-    let finalUse = d.use + lossShare; // الفقد بينضاف
+    let finalUse = d.use + lossShare; // الفقد بينضاف للاستهلاك
     let bill = finalUse * price;
     let remain = bill - pay;
-    let cls = remain >= 0 ? 'debt' : 'result';
+    
+    let cls = remain >= 0 ? 'debt' : 'credit';
     let txt = remain >= 0 ? `عليه: ${remain.toFixed(2)} ش` : `له رصيد: ${Math.abs(remain).toFixed(2)} ش`;
-    html += `<b>${name}</b><br>استهلاك: ${d.use.toFixed(1)}ك + فقد: ${lossShare.toFixed(2)}ك = ${finalUse.toFixed(1)}ك<br>الفاتورة: ${bill.toFixed(2)} ش - دفعة: ${pay} ش = <span class="${cls}">${txt}</span><br><br>`;
+    
+    html += `<b>${name}</b><br>`;
+    html += `الاستهلاك: ${d.use.toFixed(2)}ك + نصيبه من الفقد: ${lossShare.toFixed(2)}ك = <b>${finalUse.toFixed(2)}ك</b><br>`;
+    html += `الفاتورة: ${bill.toFixed(2)} ش - الدفعة: ${pay.toFixed(2)} ش = <span class="${cls}">${txt}</span><br><br>`;
+    
     document.getElementById('res'+d.id).innerHTML = `<span class="${cls}">${txt}</span>`;
   }
   document.getElementById('output').innerHTML = html;
@@ -91,12 +146,14 @@ function nextWeek(){
     document.getElementById('prev'+u.id).value = document.getElementById('curr'+u.id).value;
     document.getElementById('curr'+u.id).value = '';
     document.getElementById('pay'+u.id).value = 0;
-    document.getElementById('res'+u.id).innerHTML = '';
+    document.getElementById('res'+u.id).innerHTML = 'النتيجة هتظهر هنا';
   }
   document.getElementById('mainPrev').value = document.getElementById('mainCurr').value;
   document.getElementById('mainCurr').value = '';
-  document.getElementById('output').innerHTML = '';
+  document.getElementById('output').style.display='none';
 }
+
+// يبدأ بـ 4 مشتركين
 addUser();addUser();addUser();addUser();
 </script>
 </body>
