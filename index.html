@@ -16,7 +16,7 @@
   .row div {flex: 1;}
   button {width: 100%;padding: 15px;margin-top: 15px;background: linear-gradient(90deg, #00c6ff, #0072ff);border: none;border-radius: 15px;color: #fff;font-size: 18px;font-weight: 700;cursor: pointer;box-shadow: 0 0 20px rgba(0, 114, 255, 0.6);}
   button:hover {transform: scale(1.02);}
-  .btn-add {background: linear-gradient(90deg, #7F00FF, #E100FF);}
+  .btn-add {background: linear-gradient(90deg, #7F00FF, #E100FF);box-shadow: 0 0 20px rgba(225, 0, 255, 0.6);}
   h2 {text-align: center;margin: 20px 0 10px;color: #ff00ff;text-shadow: 0 0 10px #ff00ff;}
   .subscriber {background: rgba(0,0,0,0.2);padding: 10px;border-radius: 10px;margin-top: 10px;border: 1px solid #ff00ff;}
   #result {margin-top: 20px;padding: 15px;background: rgba(0,255,0,0.1);border-radius: 15px;border: 1px solid #00ff88;display: none;}
@@ -30,7 +30,7 @@
   <div class="row">
     <div>
       <label>سعر الكيلو بالشيكل</label>
-      <input type="number" id="price" placeholder="0.65" step="0.01">
+      <input type="number" id="price" value="0.65" step="0.01">
     </div>
     <div>
       <label>تاريخ القراءة</label>
@@ -45,11 +45,39 @@
     </div>
     <div>
       <label>القراءة الحالية</label>
-      <input type="number" id="current" placeholder="0" step="0.1">
+      <input type="number" id="current" value="3000" step="0.1">
     </div>
   </div>
   
   <h2>بيانات المشتركين</h2>
   <div id="subscribers"></div>
   
-  <button class="btn-add" onclick="addSubscriber()">+ اضافة مشتر
+  <button class="btn-add" onclick="addSubscriber()">+ اضافة مشترك</button>
+  <button onclick="calculate()">احسب الفواتير</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+let subCount = 0;
+
+function addSubscriber(){
+  subCount++;
+  document.getElementById('subscribers').innerHTML += `
+    <div class="subscriber" id="sub${subCount}">
+      <label>اسم المشترك ${subCount}</label>
+      <input type="text" id="name${subCount}" placeholder="اكتب الاسم">
+      <label>عدد الكيلوات للمشترك</label>
+      <input type="number" id="kwh${subCount}" placeholder="0">
+    </div>
+  `;
+}
+
+function calculate(){
+  let price = parseFloat(document.getElementById('price').value);
+  let prev = parseFloat(document.getElementById('prev').value);
+  let current = parseFloat(document.getElementById('current').value);
+  
+  if(!price || !current){ alert("دخل سعر الكيلو والقراءة الحالية"); return; }
+  
+  let totalKwh =
